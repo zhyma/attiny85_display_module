@@ -17,13 +17,9 @@ Works with Arduino 1.8.13 IDE + Adafruit Trinket Attiny85@8MHz, 3.3V
 
 
 #include "tinySPI.h"
-//#include <SPI.h>
-#include "oled_ssd1312_12864.h"
+#include "oled_ssd1306s.h"
 
-//#include "animation.h"
 #include "bitmap.h"
-
-//uint8_t oled_buf[WIDTH * HEIGHT / 8];
 
 void setup() {
   oled.init();

@@ -3,18 +3,18 @@ For ER-OLEDM 1.09 (128x64, SSD1312)
 Connected with 4-Wire SPI Interface 
 ****************************************************/
 #include "tinySPI.h"
-#include "oled_ssd1312_12864.h"
+#include "oled_ssd1306s.h"
 
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 
-void SSD1312_12864::sendCommand(uint8_t cmd){
+void SSD1306s::sendCommand(uint8_t cmd){
   digitalWrite(OLED_DC, LOW);
   SPIWrite(cmd);
   digitalWrite(OLED_DC, HIGH);
 }
 
-void SSD1312_12864::SPIWrite(uint8_t data) {
+void SSD1306s::SPIWrite(uint8_t data) {
   #ifdef _software_SPI
     shiftOut(OLED_SDA, OLED_SCL, MSBFIRST, data);
   #else
@@ -22,7 +22,7 @@ void SSD1312_12864::SPIWrite(uint8_t data) {
   #endif
 }
 
-void SSD1312_12864::init()
+void SSD1306s::init()
 {
     #ifdef _software_SPI
     pinMode(OLED_SDA, OUTPUT);
@@ -43,8 +43,8 @@ void SSD1312_12864::init()
     digitalWrite(OLED_RST, HIGH);
     delay(100);
 
-    for (uint8_t i = 0; i < SSD1312_12864_INIT_LEN; i++){
-      sendCommand(pgm_read_byte(&SSD1312_12864_INIT_CMD[i]));
+    for (uint8_t i = 0; i < OLED_INIT_LEN; i++){
+      sendCommand(pgm_read_byte(&OLED_INIT_CMD[i]));
     }
 
     oled.drawBitmap(NULL, 0, 0, 128, 8);
@@ -54,16 +54,22 @@ void SSD1312_12864::init()
     delay(100);
 }
 
-
-void SSD1312_12864::setCursorXY(byte X, byte Y){
+void SSD1306s::setCursorXY(byte X, byte Y){
   // Y up to down,    unit: 1 page (8 pixels)
   // X left to right, unit: 1 seg  (1 pixel)
+  #ifdef _oled_ch1115_12864_H_
     sendCommand(0xB0 + Y);/* set page address */     
     sendCommand(0x00 + (X & 0x0F));   /* set low column address */      
-    sendCommand(0x10 + ((X>>4)&0x0F));  /* set high column address */    
+    sendCommand(0x10 + ((X>>4)&0x0F));  /* set high column address */
+  #endif
+  #ifdef _oled_ssd1312_12864_H_
+    sendCommand(0xB0 + Y);/* set page address */     
+    sendCommand(0x00 + (X & 0x0F));   /* set low column address */      
+    sendCommand(0x10 + ((X>>4)&0x0F));  /* set high column address */
+  #endif
 }
 
-void SSD1312_12864::drawBitmap(const byte *bitmap, byte X, byte Y, uint8_t w, uint8_t h)
+void SSD1306s::drawBitmap(const byte *bitmap, byte X, byte Y, uint8_t w, uint8_t h)
 {
   setCursorXY(X, Y);
   digitalWrite(OLED_DC, HIGH);
@@ -79,4 +85,4 @@ void SSD1312_12864::drawBitmap(const byte *bitmap, byte X, byte Y, uint8_t w, ui
   }
 }
 
-SSD1312_12864 oled;  // Preinstantiate Objects
+SSD1306s oled;  // Preinstantiate Objects
