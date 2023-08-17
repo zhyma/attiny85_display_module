@@ -12,28 +12,37 @@ Connected with 4-Wire SPI Interface
 /**** Use software SPI****/
 //#define _software_SPI
 /**** Driver: SSD1312, OLED size: 128x64 ****/
-#define _oled_ssd1312_12864_H_
+//#define _oled_ssd1312_12864_H_
 /**** Driver: CH1115, OLED size: 128x64 ****/
 //#define _oled_ch1115_12864_H_
+/**** Driver: SSD1306, OLED size: 128x32 ****/
+#define _oled_ssd1306_12832_H_
+/**** Driver: SSD1306, OLED size: 72x40 ****/
+//#define _oled_ssd1306_7240_H_
 
 #ifdef _software_SPI
 #define OLED_SDA 1
 #define OLED_SCL 2
 #endif
 
-// For hardware SPI
-// SDA is 1 (PB1/MISO/DO)
-// SCK is 2 (PB2/SCK)
-
+#if defined(_oled_ssd1312_12864_H_) || defined(_oled_ch1115_12864_H_)
+// For hardware SPI: SDA is 1 (PB1/MISO/DO), SCK is 2 (PB2/SCK)
 #define OLED_RST 3
 #define OLED_DC  4
 // CS is connected to GND with a 10K resistor.
-
-#if defined(_oled_ssd1312_12864_H_) || defined(_oled_ch1115_12864_H_)
 #define WIDTH 128
 #define HEIGHT 64
-#define PAGES HEIGHT/8
 #endif
+
+#if defined(_oled_ssd1306_12832_H_)
+#define OLED_ADDRESS      0x3C
+#define OLED_COMMAND_MODE 0x80
+#define OLED_DATA_MODE    0x40
+#define WIDTH 128
+#define HEIGHT 32
+#endif
+
+#define PAGES HEIGHT/8
 
 #ifdef _oled_ssd1312_12864_H_
 #define OLED_INIT_LEN   15
@@ -73,10 +82,23 @@ const uint8_t OLED_INIT_CMD[] PROGMEM = {
 };
 #endif
 
+#ifdef _oled_ssd1306_12832_H_
+#define OLED_INIT_LEN   13
+const uint8_t OLED_INIT_CMD[] PROGMEM = {
+  0xA8, 0x1F,       // set multiplex (HEIGHT-1): 0x1F for 128x32, 0x3F for 128x64 
+  0x22, 0x00, 0x03, // set min and max page
+  0x20, 0x00,       // set horizontal memory addressing mode
+  0x81, 0x01,       // set contrast default 0x80, you can set it to 0x00 without turning it off
+  0xDA, 0x02,       // set COM pins hardware configuration to sequential
+  0x8D, 0x14       // enable charge pump
+  //0xA1, 0xC8        // flip the screen
+};
+#endif
+
 class SSD1306s {
   public:
     void init();
-    void SPIWrite(uint8_t data);
+    void sendData(uint8_t data);
     void sendCommand(uint8_t cmd);
     void drawBitmap(const byte *bitmap, byte X, byte Y, uint8_t w, uint8_t h);
     void setCursorXY(byte X, byte Y);

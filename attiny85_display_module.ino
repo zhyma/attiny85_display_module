@@ -26,7 +26,7 @@ void setup() {
   delay(100);
   
   delay(100);
-  oled.drawBitmap(test, 0, 0, 72, 5);
+  oled.drawBitmap(test, 0, 0, 72, 4);
 }
 
 void loop() {
