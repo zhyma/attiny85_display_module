@@ -16,9 +16,9 @@ Connected with 4-Wire SPI Interface
 /**** Driver: CH1115, OLED size: 128x64 ****/
 //#define _oled_ch1115_12864_H_
 /**** Driver: SSD1306, OLED size: 128x32 ****/
-#define _oled_ssd1306_12832_H_
+//#define _oled_ssd1306_12832_H_
 /**** Driver: SSD1306, OLED size: 72x40 ****/
-//#define _oled_ssd1306_7240_H_
+#define _oled_ssd1306_7240_H_
 
 #ifdef _software_SPI
 #define OLED_SDA 1
@@ -36,10 +36,19 @@ Connected with 4-Wire SPI Interface
 
 #if defined(_oled_ssd1306_12832_H_)
 #define OLED_ADDRESS      0x3C
-#define OLED_COMMAND_MODE 0x80
+#define OLED_COMMAND_MODE 0x00//0x80 (0x00?0x80? both works?)
 #define OLED_DATA_MODE    0x40
 #define WIDTH 128
 #define HEIGHT 32
+#endif
+
+
+#if defined(_oled_ssd1306_7240_H_)
+#define OLED_ADDRESS      0x3C
+#define OLED_COMMAND_MODE 0x00
+#define OLED_DATA_MODE    0x40
+#define WIDTH  72
+#define HEIGHT 40
 #endif
 
 #define PAGES HEIGHT/8
@@ -92,6 +101,27 @@ const uint8_t OLED_INIT_CMD[] PROGMEM = {
   0xDA, 0x02,       // set COM pins hardware configuration to sequential
   0x8D, 0x14       // enable charge pump
   //0xA1, 0xC8        // flip the screen
+};
+#endif
+
+#ifdef _oled_ssd1306_7240_H_
+#define OLED_INIT_LEN   24
+const uint8_t OLED_INIT_CMD[] PROGMEM = {
+  0xAE,//--turn off oled panel
+  0xD5, 0x80,//--set display clock divide ratio/oscillator frequency --set divide ratio
+  0xA8, 0x27,//--set multiplex ratio --1/40 duty
+  0xD3, 0x00,//-set display offset-not offset
+  0xAD, 0x30,//--Internal IREF Setting 
+  0x8D, 0x14,//--set Charge Pump enable/disable--set(0x10) disable
+  0x40,//--set start line address
+  0xA6,//--set normal display
+  0xA4,//Disable Entire Display On
+  0xA1,//--set segment re-map 128 to 0
+  0xC8,//--Set COM Output Scan Direction 64 to 0
+  0xDA, 0x12,//--set com pins hardware configuration
+  0x81, 0x00,//--set contrast control register
+  0xD9, 0x22,//--set pre-charge period
+  0xDB, 0x20//--set vcomh
 };
 #endif
 

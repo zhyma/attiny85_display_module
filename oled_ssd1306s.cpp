@@ -8,7 +8,7 @@ Connected with 4-Wire SPI Interface
   #include "tinySPI.h"
 #endif
 
-#if defined(_oled_ssd1306_12832_H_)
+#if defined(_oled_ssd1306_12832_H_) || defined (_oled_ssd1306_7240_H_)
   #include "TinyWireM.h"
 #endif
 
@@ -22,7 +22,7 @@ void SSD1306s::sendCommand(uint8_t cmd){
   digitalWrite(OLED_DC, HIGH);
   #endif
 
-  #if defined(_oled_ssd1306_12832_H_)
+  #if defined(_oled_ssd1306_12832_H_) || defined (_oled_ssd1306_7240_H_)
   TinyWireM.beginTransmission(OLED_ADDRESS); // begin transmitting
   TinyWireM.send(OLED_COMMAND_MODE);//data mode
   TinyWireM.send(cmd);
@@ -35,7 +35,7 @@ void SSD1306s::sendData(uint8_t data) {
     shiftOut(OLED_SDA, OLED_SCL, MSBFIRST, data);
   #elif defined (_oled_ssd1312_12864_H_) || defined(_oled_ch1115_12864_H_)
     SPI.transfer(data);
-  #elif defined (_oled_ssd1306_12832_H_)
+  #elif defined (_oled_ssd1306_12832_H_) || defined (_oled_ssd1306_7240_H_)
     TinyWireM.beginTransmission(OLED_ADDRESS); // begin transmitting
     TinyWireM.send(OLED_DATA_MODE);//data mode
     TinyWireM.send(data);
@@ -63,7 +63,7 @@ void SSD1306s::init()
       delay(10);
       digitalWrite(OLED_RST, HIGH);
       delay(100);
-    #else defined(_oled_ssd1306_12832_H_)
+    #else defined(_oled_ssd1306_12832_H_) || defined (_oled_ssd1306_7240_H_)
       TinyWireM.begin();
     #endif
 
@@ -71,7 +71,7 @@ void SSD1306s::init()
       sendCommand(pgm_read_byte(&OLED_INIT_CMD[i]));
     }
 
-    oled.drawBitmap(NULL, 0, 0, 128, 8);
+    oled.drawBitmap(NULL, 0, 0, WIDTH, HEIGHT);
     delay(100);
     sendCommand(0xAF);
 
@@ -97,6 +97,12 @@ void SSD1306s::setCursorXY(byte X, byte Y){
   sendCommand(0xB0 + Y);                //set page address
   sendCommand(0x00 + (X & 0x0F));     //set column lower address
   sendCommand(0x10 + ((X>>4)&0x0F));  //set column higher address
+  #endif
+
+  #ifdef _oled_ssd1306_7240_H_
+  sendCommand(0xB0 + Y);                //set page address
+  sendCommand(0x0c);     //set column lower address
+  sendCommand(0x11);  //set column higher address
   #endif
 }
 
